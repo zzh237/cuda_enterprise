@@ -1,14 +1,30 @@
-# CUDAatScaleForTheEnterpriseCourseProjectTemplate
-This the final course project for the "CUDA at Scale for the Enterprise"
-coursera course by Guy Baruch.
+# CUDA Sobel Filter Project
+This is a project demonstrating the implementation of the Sobel filter using CUDA, created as part of the "CUDA at Scale for the Enterprise" Coursera course.
 
 ## Project Description
 
-The purpose of this application is to present an input image at consecutive subresolutions on a single output image.
-It inputs a number k=1,..,9 and a greyscale N by M image and outputs an (3/2)N by M image (in PNG format), with copies of the original image downscaled by factors of X2, X4, X8 .. X2^k within the same image.
+The Sobel filter, or Sobel operator, is used in image processing primarily for edge detection. The operator uses two 3×3 convolution kernels which are applied to the original image to produce separate measurements of the gradient in the x and y directions.
 
-For an example, the run.sh script runs the application on the sloth greyscale image.
-An example of input and output is in data/sloth-gray.png and data/sloth-gray-mr-example.png, respectively.
+This CUDA-based implementation speeds up the Sobel filter processing by leveraging the parallel processing capabilities of NVIDIA GPUs.
+
+The application inputs a greyscale N by M image and outputs an N by M image (in PNG format) highlighting the edges detected in the original image.
+
+## Usage
+
+1. Compile the program using the provided Makefile.
+2. Run the program by providing a path to a greyscale image:
+3. The program will output a new PNG image with edges highlighted.
+
+## Example
+
+For a demonstration, you can run the provided `run.sh` script which applies the Sobel filter to a sample greyscale image.
+Input and output examples can be found in `data/sloth-gray.png` and `data/sloth-gray-sobel.png`, respectively.
+
+## Dependencies
+
+- NVIDIA GPU with CUDA capability.
+- CUDA toolkit and libraries installed.
+- FreeImage library for image input/output operations.
 
 ## Code Organization
 
