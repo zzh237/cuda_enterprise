@@ -16,7 +16,12 @@ __global__ void sobel_filter(const unsigned char* input, unsigned char* output, 
         float gy = input[(y-1)*width + (x-1)] + 2 * input[(y-1)*width + x] + input[(y-1)*width + (x+1)] 
                  - input[(y+1)*width + (x-1)] - 2 * input[(y+1)*width + x] - input[(y+1)*width + (x+1)];
 
-        output[y*width + x] = sqrt(gx*gx + gy*gy);
+        float magnitude = sqrt(gx*gx + gy*gy);
+
+        // Clamp values to [0, 255]
+        magnitude = fminf(255.0f, fmaxf(0.0f, magnitude));
+
+        output[y*width + x] = magnitude;
     }
 }
 
@@ -48,7 +53,7 @@ bool read_image(const std::string& filename, std::vector<unsigned char>& data, i
 }
 
 bool write_image(const std::string& filename, const std::vector<unsigned char>& data, int width, int height) {
-    std::ofstream output(filename.c_str(), std::ios::binary);
+    std::ofstream output(filename, std::ios::binary);
     if (!output) return false;
 
     output << "P6\n" << width << " " << height << "\n255\n";
