@@ -18,16 +18,17 @@ __global__ void sobel_filter(const unsigned char* input, unsigned char* output, 
 
         float magnitude = sqrt(gx*gx + gy*gy);
 
-        // Clamp values to [0, 255]
-        magnitude = fminf(255.0f, fmaxf(0.0f, magnitude));
+        // Bound the values between 0 and 255
+        magnitude = magnitude > 255 ? 255 : magnitude;
+        magnitude = magnitude < 0 ? 0 : magnitude;
 
-        output[y*width + x] = magnitude;
+        output[y*width + x] = (unsigned char)magnitude;
     }
 }
 
 // PPM image I/O functions (only for grayscale images here)
 bool read_image(const std::string& filename, std::vector<unsigned char>& data, int& width, int& height) {
-    std::ifstream input(filename.c_str(), std::ios::binary);
+    std::ifstream input(filename, std::ios::binary);
     if (!input) return false;
 
     std::string header;
