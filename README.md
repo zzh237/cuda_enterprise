@@ -7,18 +7,18 @@ The Sobel filter, or Sobel operator, is used in image processing primarily for e
 
 This CUDA-based implementation speeds up the Sobel filter processing by leveraging the parallel processing capabilities of NVIDIA GPUs.
 
-The application inputs a greyscale N by M image and outputs an N by M image (in PNG format) highlighting the edges detected in the original image.
+The application inputs a greyscale N by M image and outputs an N by M image (in PPM format) highlighting the edges detected in the original image.
 
 ## Usage
 
 1. Compile the program using the provided Makefile.
 2. Run the program by providing a path to a greyscale image:
-3. The program will output a new PNG image with edges highlighted.
+3. The program will output a new PPM image with edges highlighted.
 
 ## Example
 
 For a demonstration, you can run the provided `run.sh` script which applies the Sobel filter to a sample greyscale image.
-Input and output examples can be found in `data/sloth-gray.png` and `data/sloth-gray-sobel.png`, respectively.
+Input and output examples can be found in `data/panda.ppm` and `data/panda-sobel.ppm`, respectively.
 
 ## Dependencies
 
