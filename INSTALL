@@ -14,5 +14,5 @@ gives the format, and
 
 ./bin/sobel_filter.exe <INPUT_FILE> <OUTPUT_FILE>
 
-where INPUT_FILE is a greyscale 8bit char image is the generic command.
+where INPUT_FILE is a greyscale image in ppm format.
 
