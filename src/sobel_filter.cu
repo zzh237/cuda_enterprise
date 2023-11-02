@@ -1,8 +1,10 @@
 #include <iostream>
-#include <opencv2/opencv.hpp>
+#include <fstream>
+#include <vector>
+#include <cmath>
 #include <cuda_runtime.h>
 
-__global__ void sobel_filter(unsigned char* input, unsigned char* output, int width, int height) {
+__global__ void sobel_filter(const unsigned char* input, unsigned char* output, int width, int height) {
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
 
@@ -18,38 +20,80 @@ __global__ void sobel_filter(unsigned char* input, unsigned char* output, int wi
     }
 }
 
+// PPM image I/O functions (only for grayscale images here)
+bool read_image(const std::string& filename, std::vector<unsigned char>& data, int& width, int& height) {
+    std::ifstream input(filename.c_str(), std::ios::binary);
+    if (!input) return false;
+
+    std::string header;
+    input >> header;
+    if (header != "P6") return false;
+
+    input >> width >> height;
+    int max_val;
+    input >> max_val;
+    input.get(); // consume newline
+
+    data.resize(width * height * 3); // 3 for RGB
+    input.read(reinterpret_cast<char*>(data.data()), width * height * 3);
+
+    // Convert to grayscale
+    for (int i = 0; i < width * height; i++) {
+        unsigned char gray = (data[3*i] + data[3*i+1] + data[3*i+2]) / 3;
+        data[i] = gray;
+    }
+
+    data.resize(width * height);
+    return true;
+}
+
+bool write_image(const std::string& filename, const std::vector<unsigned char>& data, int width, int height) {
+    std::ofstream output(filename.c_str(), std::ios::binary);
+    if (!output) return false;
+
+    output << "P6\n" << width << " " << height << "\n255\n";
+    for (int i = 0; i < width * height; i++) {
+        output << data[i] << data[i] << data[i]; // grayscale as RGB
+    }
+    return true;
+}
+
 int main(int argc, char** argv) {
     if(argc != 3) {
-        std::cerr << "Usage: ./sobel_filter <input_image_path> <output_image_path>" << std::endl;
+        std::cerr << "Usage: ./sobel_filter <input_image_path.ppm> <output_image_path.ppm>" << std::endl;
         return -1;
     }
 
-    cv::Mat image = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
-    if(!image.data) {
+    std::vector<unsigned char> image, output;
+    int width, height;
+    if (!read_image(argv[1], image, width, height)) {
         std::cerr << "Error reading image!" << std::endl;
         return -1;
     }
-
-    cv::Mat output(image.rows, image.cols, CV_8UC1);
+    output.resize(width * height);
 
     unsigned char* d_input;
     unsigned char* d_output;
 
-    cudaMalloc(&d_input, image.rows * image.cols);
-    cudaMalloc(&d_output, image.rows * image.cols);
+    cudaMalloc(&d_input, width * height);
+    cudaMalloc(&d_output, width * height);
 
-    cudaMemcpy(d_input, image.data, image.rows * image.cols, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_input, image.data(), width * height, cudaMemcpyHostToDevice);
 
     dim3 threadsPerBlock(16, 16);
-    dim3 blocksPerGrid((image.cols + threadsPerBlock.x - 1) / threadsPerBlock.x, (image.rows + threadsPerBlock.y - 1) / threadsPerBlock.y);
-    sobel_filter<<<blocksPerGrid, threadsPerBlock>>>(d_input, d_output, image.cols, image.rows);
+    dim3 blocksPerGrid((width + threadsPerBlock.x - 1) / threadsPerBlock.x, (height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+    sobel_filter<<<blocksPerGrid, threadsPerBlock>>>(d_input, d_output, width, height);
 
-    cudaMemcpy(output.data, d_output, image.rows * image.cols, cudaMemcpyDeviceToHost);
+    cudaMemcpy(output.data(), d_output, width * height, cudaMemcpyDeviceToHost);
 
-    cv::imwrite(argv[2], output);
+    if (!write_image(argv[2], output, width, height)) {
+        std::cerr << "Error writing output image!" << std::endl;
+        return -1;
+    }
 
     cudaFree(d_input);
     cudaFree(d_output);
 
     return 0;
 }
+

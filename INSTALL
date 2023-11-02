@@ -1,9 +1,8 @@
 
 On linux:
 1) install nvidia-cuda-toolkit
-2) install opencv2
-3) download cuda-samples consistent with you cuda version and copy the Common directory to the project root.
-4) make
+2) download cuda-samples consistent with you cuda version and copy the Common directory to the project root.
+3) make
 
 Then run run.sh.
 

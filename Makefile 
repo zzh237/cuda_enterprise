@@ -6,13 +6,12 @@ COMPILER=nvcc
 #LIBRARIES += -lcudart -lcuda -lnppisu -lnppif -lnppc -lculibos -lfreeimage
 LIBRARIES += -lcuda -lcudart -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc
 
-COMPILER_FLAGS=-I/usr/local/cuda/include -I/usr/local/cuda/lib64 \
-	-I./Common -I./Common/UtilNPP ${LIBRARIES} --std c++17 \
-	-g
+COMPILER_FLAGS=-I/u/local/cuda/11.8/include -I/u/local/cuda/11.8/lib64 \
+-I../openCV/opencv-4.x/include -I./Common -I./Common/UtilNPP ${LIBRARIES} -std c++11 -g
 
-build: bin/sobel_filter
+build: bin/sobel_filter.exe
 
-bin/sobel_filter: src/sobel_filter.cu
+./bin/sobel_filter.exe: ./src/sobel_filter.cu
 	$(COMPILER) $(COMPILER_FLAGS) $< -o $@
 
 clean:
